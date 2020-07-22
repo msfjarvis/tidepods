@@ -1,26 +1,42 @@
 package dev.msfjarvis
 
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
 import io.ktor.http.*
-import io.ktor.html.*
-import kotlinx.html.*
-import kotlinx.css.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
-import io.ktor.client.features.logging.*
 import kotlin.test.*
 import io.ktor.server.testing.*
 
 class ApplicationTest {
     @Test
     fun testRoot() {
-        withTestApplication({ module(testing = true) }) {
-            handleRequest(HttpMethod.Get, "/").apply {
+        withTestApplication({ module() }) {
+            handleRequest(HttpMethod.Get, "/view").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                assertEquals("HELLO WORLD!", response.content)
+                assertEquals("No url query parameter provided", response.content)
+            }
+            handleRequest(HttpMethod.Get, "/view?url=https://msfjarvis.dev").apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("View recoded for https://msfjarvis.dev", response.content)
+            }
+            handleRequest(HttpMethod.Get, "/stats").apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("""
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <title>Stats</title>
+                      </head>
+                      <body>
+                        <h1>Stats</h1>
+                        <table>
+                          <thead>URL</thead>
+                          <thead>Count</thead>
+                          <tr>
+                            <td>https://msfjarvis.dev</td>
+                            <td>1</td>
+                          </tr>
+                        </table>
+                      </body>
+                    </html>
+                """.trimIndent(), response.content?.trimIndent())
             }
         }
     }
