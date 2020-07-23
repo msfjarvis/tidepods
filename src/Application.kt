@@ -2,10 +2,6 @@ package dev.msfjarvis
 
 import io.ktor.application.Application
 import io.ktor.application.call
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logging
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.response.respondText
@@ -29,12 +25,6 @@ fun main(args: Array<String>) = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
-  val client = HttpClient(Apache) {
-    install(Logging) {
-      level = LogLevel.HEADERS
-    }
-  }
-
   val json = Json(JsonConfiguration.Stable)
 
   routing {
