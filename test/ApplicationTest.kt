@@ -43,6 +43,10 @@ class ApplicationTest {
           """.trimIndent(), response.content?.trimIndent()
         )
       }
+      handleRequest(HttpMethod.Get, "/stats?json").apply {
+        assertEquals(HttpStatusCode.OK, response.status())
+        assertEquals("[{\"url\":\"https://msfjarvis.dev\",\"views\":1}]", response.content)
+      }
     }
   }
 }
