@@ -21,44 +21,44 @@ fun main(args: Array<String>) = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
-    val client = HttpClient(Apache) {
-        install(Logging) {
-            level = LogLevel.HEADERS
-        }
+  val client = HttpClient(Apache) {
+    install(Logging) {
+      level = LogLevel.HEADERS
     }
+  }
 
-    routing {
-        get("/view") {
-            val url = call.request.queryParameters["url"]
-            if (url.isNullOrEmpty()) {
-                call.respondText("No url query parameter provided")
-            } else {
-                launch(Dispatchers.IO) {
-                    var count = db[url] ?: 0
-                    db[url] = ++count
-                }
-                call.respondText("View recoded for $url")
-            }
+  routing {
+    get("/view") {
+      val url = call.request.queryParameters["url"]
+      if (url.isNullOrEmpty()) {
+        call.respondText("No url query parameter provided")
+      } else {
+        launch(Dispatchers.IO) {
+          var count = db[url] ?: 0
+          db[url] = ++count
         }
-        get("/stats") {
-            call.respondHtml {
-                head {
-                    title { +"Stats" }
-                }
-                body {
-                    h1 { +"Stats" }
-                    table {
-                        thead { +"URL" }
-                        thead { +"Count" }
-                        db.forEach { (url, count) ->
-                            tr {
-                                td { +url }
-                                td { +"$count" }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        call.respondText("View recoded for $url")
+      }
     }
+    get("/stats") {
+      call.respondHtml {
+        head {
+          title { +"Stats" }
+        }
+        body {
+          h1 { +"Stats" }
+          table {
+            thead { +"URL" }
+            thead { +"Count" }
+            db.forEach { (url, count) ->
+              tr {
+                td { +url }
+                td { +"$count" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
