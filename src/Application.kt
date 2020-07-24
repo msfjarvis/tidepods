@@ -18,17 +18,50 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import java.io.File
+import java.util.*
+import kotlin.system.exitProcess
 
 val db = HashMap<String, Long>()
+val json = Json(JsonConfiguration.Stable)
+var latestStats = ""
+val statsFile = File("stats.json")
 
 @Serializable
 data class Site(val url: String, val views: Long)
+
+private fun flushToDisk() = synchronized(db) {
+  latestStats = json.stringify(
+    Site.serializer().list,
+    db.map { entry -> Site(entry.key, entry.value) }.toList()
+  )
+  statsFile.writeText(latestStats)
+}
 
 fun main(args: Array<String>) = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
-  val json = Json(JsonConfiguration.Stable)
+
+  Timer().scheduleAtFixedRate(object : TimerTask() {
+    override fun run() {
+      flushToDisk()
+    }
+  }, 10000, 60000)
+
+  if (statsFile.exists()) {
+    latestStats = statsFile.readText()
+    if (latestStats.isEmpty()) latestStats = "[]"
+    json.parse(Site.serializer().list, latestStats).map { (url, views) -> db[url] = views }
+  } else {
+    if (!statsFile.createNewFile()) {
+      println("Failed to create statsFile $statsFile")
+      exitProcess(128)
+    } else {
+      latestStats = "[]"
+      statsFile.writeText(latestStats)
+    }
+  }
 
   routing {
     get("/view") {
@@ -37,8 +70,10 @@ fun Application.module() {
         call.respondText("No url query parameter provided")
       } else {
         launch(Dispatchers.IO) {
-          var count = db[url] ?: 0
-          db[url] = ++count
+          synchronized(db) {
+            var count = db[url] ?: 0
+            db[url] = ++count
+          }
         }
         call.respondText("View recoded for $url")
       }
@@ -66,7 +101,7 @@ fun Application.module() {
         }
       } else if (format == "json") {
         call.respondText(ContentType.Application.Json) {
-          json.stringify(Site.serializer().list, db.map { entry -> Site(entry.key, entry.value) }.toList())
+          statsFile.readText()
         }
       } else {
         call.respondText(status = HttpStatusCode.BadRequest) { "Invalid format: $format" }
@@ -77,5 +112,6 @@ fun Application.module() {
       body.forEach { site -> db[site.url] = site.views }
       call.respondText { "Entered bulk data into stats DB" }
     }
+    post("/flush") { flushToDisk() }
   }
 }
