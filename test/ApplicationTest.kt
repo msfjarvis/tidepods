@@ -3,7 +3,11 @@ package dev.msfjarvis
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,9 +47,19 @@ class ApplicationTest {
           """.trimIndent(), response.content?.trimIndent()
         )
       }
-      handleRequest(HttpMethod.Get, "/stats?json").apply {
+      handleRequest(HttpMethod.Get, "/stats?format=json").apply {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("[{\"url\":\"https://msfjarvis.dev\",\"views\":1}]", response.content)
+      }
+      handleRequest(HttpMethod.Post, "/stats") {
+        setBody(Json(JsonConfiguration.Stable).stringify(Site.serializer().list, listOf(Site("https://msfjarvis.dev", 0))))
+      }.apply {
+        assertEquals(HttpStatusCode.OK, response.status())
+        assertEquals("Entered bulk data into stats DB", response.content)
+      }
+      handleRequest(HttpMethod.Get, "/stats?format=json").apply {
+        assertEquals(HttpStatusCode.OK, response.status())
+        assertEquals("[{\"url\":\"https://msfjarvis.dev\",\"views\":0}]", response.content)
       }
     }
   }
