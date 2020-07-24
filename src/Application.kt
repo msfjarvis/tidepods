@@ -4,6 +4,7 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.receiveText
 import io.ktor.response.respondText
 import io.ktor.routing.get
@@ -68,7 +69,7 @@ fun Application.module() {
           json.stringify(Site.serializer().list, db.map { entry -> Site(entry.key, entry.value) }.toList())
         }
       } else {
-        call.respondText { "Invalid format: $format" }
+        call.respondText(status = HttpStatusCode.BadRequest) { "Invalid format: $format" }
       }
     }
     post("/stats") {
