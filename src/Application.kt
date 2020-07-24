@@ -4,8 +4,10 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
+import io.ktor.request.receiveText
 import io.ktor.response.respondText
 import io.ktor.routing.get
+import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.netty.EngineMain
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +70,11 @@ fun Application.module() {
       } else {
         call.respondText { "Invalid format: $format" }
       }
+    }
+    post("/stats") {
+      val body = json.parse(Site.serializer().list, call.receiveText())
+      body.forEach { site -> db[site.url] = site.views }
+      call.respondText { "Entered bulk data into stats DB" }
     }
   }
 }
