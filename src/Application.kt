@@ -41,12 +41,8 @@ fun Application.module() {
       }
     }
     get("/stats") {
-      val isJson = call.request.queryParameters.contains("json")
-      if (isJson) {
-        call.respondText(ContentType.Application.Json) {
-          json.stringify(Site.serializer().list, db.map { entry -> Site(entry.key, entry.value) }.toList())
-        }
-      } else {
+      val format = call.request.queryParameters["format"]
+      if (format == null || format == "html") {
         call.respondHtml {
           head {
             title { +"Stats" }
@@ -65,6 +61,12 @@ fun Application.module() {
             }
           }
         }
+      } else if (format == "json") {
+        call.respondText(ContentType.Application.Json) {
+          json.stringify(Site.serializer().list, db.map { entry -> Site(entry.key, entry.value) }.toList())
+        }
+      } else {
+        call.respondText { "Invalid format: $format" }
       }
     }
   }
