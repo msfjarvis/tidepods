@@ -75,6 +75,9 @@ fun Application.module(test: Boolean = false) {
     get("/") {
       call.respondRedirect("/stats", permanent = true)
     }
+    get("/favicon.ico") {
+      call.respondRedirect("https://msfjarvis.dev/favicon.ico", permanent = true)
+    }
     get("/view") {
       val url = call.request.queryParameters["url"]
       if (url.isNullOrEmpty()) {
