@@ -8,6 +8,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.request.receiveText
+import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -70,6 +71,9 @@ fun Application.module(test: Boolean = false) {
   routing {
     static("/static") {
       resources("static")
+    }
+    get("/") {
+      call.respondRedirect("/stats", permanent = true)
     }
     get("/view") {
       val url = call.request.queryParameters["url"]
