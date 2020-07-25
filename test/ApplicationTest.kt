@@ -17,6 +17,14 @@ class ApplicationTest {
   @Test
   fun testRoot() {
     withTestApplication({ module(true) }) {
+      handleRequest(HttpMethod.Get, "/").apply {
+        assertEquals(HttpStatusCode.MovedPermanently, response.status())
+        assertEquals("/stats", response.headers["Location"])
+      }
+      handleRequest(HttpMethod.Get, "/favicon.ico").apply {
+        assertEquals(HttpStatusCode.MovedPermanently, response.status())
+        assertEquals("https://msfjarvis.dev/favicon.ico", response.headers["Location"])
+      }
       handleRequest(HttpMethod.Get, "/view").apply {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("No url query parameter provided", response.content)
