@@ -119,7 +119,7 @@ fun Application.module(test: Boolean = false) {
                       }
                     }
                   } else {
-                    json.parse(Site.serializer().list, latestStats).map { (url, count) ->
+                    json.parse(Site.serializer().list, latestStats).sortedBy { it.views }.reversed().map { (url, count) ->
                       tr {
                         td {
                           attributes["data-th"] = "URL"
