@@ -41,7 +41,7 @@ private fun flushToDisk() = synchronized(db) {
 fun main(args: Array<String>) = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
-fun Application.module() {
+fun Application.module(test: Boolean = false) {
 
   Timer().scheduleAtFixedRate(object : TimerTask() {
     override fun run() {
@@ -49,17 +49,19 @@ fun Application.module() {
     }
   }, 10000, 60000)
 
-  if (statsFile.exists()) {
-    latestStats = statsFile.readText()
-    if (latestStats.isEmpty()) latestStats = "[]"
-    json.parse(Site.serializer().list, latestStats).map { (url, views) -> db[url] = views }
-  } else {
-    if (!statsFile.createNewFile()) {
-      println("Failed to create statsFile $statsFile")
-      exitProcess(128)
+  if (!test) {
+    if (statsFile.exists()) {
+      latestStats = statsFile.readText()
+      if (latestStats.isEmpty()) latestStats = "[]"
+      json.parse(Site.serializer().list, latestStats).map { (url, views) -> db[url] = views }
     } else {
-      latestStats = "[]"
-      statsFile.writeText(latestStats)
+      if (!statsFile.createNewFile()) {
+        println("Failed to create statsFile $statsFile")
+        exitProcess(128)
+      } else {
+        latestStats = "[]"
+        statsFile.writeText(latestStats)
+      }
     }
   }
 
@@ -90,10 +92,19 @@ fun Application.module() {
             table {
               thead { +"URL" }
               thead { +"Count" }
-              db.forEach { (url, count) ->
-                tr {
-                  td { +url }
-                  td { +"$count" }
+              if (test) {
+                db.forEach { (url, count) ->
+                  tr {
+                    td { +url }
+                    td { +"$count" }
+                  }
+                }
+              } else {
+                json.parse(Site.serializer().list, latestStats).map { (url, count) ->
+                  tr {
+                    td { +url }
+                    td { +"$count" }
+                  }
                 }
               }
             }
@@ -101,7 +112,14 @@ fun Application.module() {
         }
       } else if (format == "json") {
         call.respondText(ContentType.Application.Json) {
-          statsFile.readText()
+          if (test) {
+            json.stringify(
+              Site.serializer().list,
+              db.map { entry -> Site(entry.key, entry.value) }.toList()
+            )
+          } else {
+            statsFile.readText()
+          }
         }
       } else {
         call.respondText(status = HttpStatusCode.BadRequest) { "Invalid format: $format" }
@@ -110,6 +128,7 @@ fun Application.module() {
     post("/stats") {
       val body = json.parse(Site.serializer().list, call.receiveText())
       body.forEach { site -> db[site.url] = site.views }
+      flushToDisk()
       call.respondText { "Entered bulk data into stats DB" }
     }
     post("/flush") { flushToDisk() }

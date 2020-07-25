@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 class ApplicationTest {
   @Test
   fun testRoot() {
-    withTestApplication({ module() }) {
+    withTestApplication({ module(true) }) {
       handleRequest(HttpMethod.Get, "/view").apply {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("No url query parameter provided", response.content)
@@ -24,7 +24,6 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("View recoded for https://msfjarvis.dev", response.content)
       }
-      handleRequest(HttpMethod.Post, "/flush")
       handleRequest(HttpMethod.Get, "/stats").apply {
         verifyHtmlResponse()
       }
@@ -50,7 +49,6 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("Entered bulk data into stats DB", response.content)
       }
-      handleRequest(HttpMethod.Post, "/flush")
       handleRequest(HttpMethod.Get, "/stats?format=json").apply {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("[{\"url\":\"https://msfjarvis.dev\",\"views\":0}]", response.content)
