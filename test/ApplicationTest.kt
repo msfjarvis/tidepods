@@ -64,17 +64,24 @@ class ApplicationTest {
       <html>
         <head>
           <title>Stats</title>
+          <link href="/static/styles.css" rel="stylesheet">
         </head>
         <body>
-          <h1>Stats</h1>
-          <table>
-            <thead>URL</thead>
-            <thead>Count</thead>
-            <tr>
-              <td>https://msfjarvis.dev</td>
-              <td>1</td>
-            </tr>
-          </table>
+          <div class="container">
+            <h1>Stats</h1>
+            <table class="table-1">
+              <tbody>
+                <tr>
+                  <th>URL</th>
+                  <th>Count</th>
+                </tr>
+                <tr>
+                  <td data-th="URL">https://msfjarvis.dev</td>
+                  <td data-th="Count">1</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </body>
       </html>
       """.trimIndent(), response.content?.trimIndent()
