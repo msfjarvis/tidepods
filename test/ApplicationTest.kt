@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ApplicationTest {
+  private val testData = arrayListOf(Site("https://msfjarvis.dev", 1))
   @Test
   fun testRoot() {
     withTestApplication({ module(true) }) {
@@ -20,9 +21,11 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("No url query parameter provided", response.content)
       }
-      handleRequest(HttpMethod.Get, "/view?url=https://msfjarvis.dev").apply {
-        assertEquals(HttpStatusCode.OK, response.status())
-        assertEquals("View recoded for https://msfjarvis.dev", response.content)
+      testData.map { (url, _) ->
+        handleRequest(HttpMethod.Get, "/view?url=$url").apply {
+          assertEquals(HttpStatusCode.OK, response.status())
+          assertEquals("View recoded for $url", response.content)
+        }
       }
       handleRequest(HttpMethod.Get, "/stats").apply {
         verifyHtmlResponse()
@@ -36,14 +39,13 @@ class ApplicationTest {
       }
       handleRequest(HttpMethod.Get, "/stats?format=json").apply {
         assertEquals(HttpStatusCode.OK, response.status())
-        assertEquals("[{\"url\":\"https://msfjarvis.dev\",\"views\":1}]", response.content)
+        assertEquals(testData, json.parse(Site.serializer().list, response.content!!))
       }
+      testData.add(Site("https://msfjarvis.dev/g/tidepods", 2))
+      testData.sortBy { it.views }
       handleRequest(HttpMethod.Post, "/stats") {
         setBody(
-          Json(JsonConfiguration.Stable).stringify(
-            Site.serializer().list,
-            listOf(Site("https://msfjarvis.dev", 0))
-          )
+          Json(JsonConfiguration.Stable).stringify(Site.serializer().list, testData)
         )
       }.apply {
         assertEquals(HttpStatusCode.OK, response.status())
@@ -51,7 +53,7 @@ class ApplicationTest {
       }
       handleRequest(HttpMethod.Get, "/stats?format=json").apply {
         assertEquals(HttpStatusCode.OK, response.status())
-        assertEquals("[{\"url\":\"https://msfjarvis.dev\",\"views\":0}]", response.content)
+        assertEquals(testData, json.parse(Site.serializer().list, response.content!!).sortedBy { it.views })
       }
     }
   }
