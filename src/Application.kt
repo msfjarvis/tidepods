@@ -5,6 +5,8 @@ import io.ktor.application.call
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.resources
+import io.ktor.http.content.static
 import io.ktor.request.receiveText
 import io.ktor.response.respondText
 import io.ktor.routing.get
@@ -66,6 +68,9 @@ fun Application.module(test: Boolean = false) {
   }
 
   routing {
+    static("/static") {
+      resources("static")
+    }
     get("/view") {
       val url = call.request.queryParameters["url"]
       if (url.isNullOrEmpty()) {
@@ -86,24 +91,46 @@ fun Application.module(test: Boolean = false) {
         call.respondHtml {
           head {
             title { +"Stats" }
+            link {
+              href = "/static/styles.css"
+              rel = "stylesheet"
+            }
           }
           body {
-            h1 { +"Stats" }
-            table {
-              thead { +"URL" }
-              thead { +"Count" }
-              if (test) {
-                db.forEach { (url, count) ->
+            div(classes = "container") {
+              h1 { +"Stats" }
+              table(classes = "table-1") {
+                tbody {
                   tr {
-                    td { +url }
-                    td { +"$count" }
+                    th { +"URL" }
+                    th { +"Count" }
                   }
-                }
-              } else {
-                json.parse(Site.serializer().list, latestStats).map { (url, count) ->
-                  tr {
-                    td { +url }
-                    td { +"$count" }
+                  if (test) {
+                    db.forEach { (url, count) ->
+                      tr {
+                        td {
+                          attributes["data-th"] = "URL"
+                          +url
+                        }
+                        td {
+                          attributes["data-th"] = "Count"
+                          +"$count"
+                        }
+                      }
+                    }
+                  } else {
+                    json.parse(Site.serializer().list, latestStats).map { (url, count) ->
+                      tr {
+                        td {
+                          attributes["data-th"] = "URL"
+                          +url
+                        }
+                        td {
+                          attributes["data-th"] = "Count"
+                          +"$count"
+                        }
+                      }
+                    }
                   }
                 }
               }
