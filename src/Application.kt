@@ -10,6 +10,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.request.receiveText
+import io.ktor.response.respondFile
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.routing.get
@@ -24,6 +25,7 @@ import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import java.io.File
+import java.security.SecureRandom
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -50,6 +52,12 @@ fun Application.module(test: Boolean = false) {
 
   install(AutoHeadResponse)
 
+  val stylesEndpoint = if (test) {
+    "/styles.css"
+  } else {
+    "/styles.${SecureRandom().nextInt()}.css"
+  }
+
   Timer().scheduleAtFixedRate(object : TimerTask() {
     override fun run() {
       flushToDisk()
@@ -73,6 +81,9 @@ fun Application.module(test: Boolean = false) {
   }
 
   routing {
+    get(stylesEndpoint) {
+      call.respondFile(File("resources/static/styles.css"))
+    }
     static("/static") {
       resources("static")
     }
@@ -103,7 +114,7 @@ fun Application.module(test: Boolean = false) {
           head {
             title { +"Stats" }
             link {
-              href = "/static/styles.css"
+              href = stylesEndpoint
               rel = "stylesheet"
             }
           }
