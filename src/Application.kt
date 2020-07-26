@@ -33,6 +33,7 @@ val db = HashMap<String, Long>()
 val json = Json(JsonConfiguration.Stable)
 var latestStats = ""
 val statsFile = File("stats.json")
+val stylesFile = File("resources/static/styles.css")
 
 @Serializable
 data class Site(val url: String, val views: Long)
@@ -82,7 +83,7 @@ fun Application.module(test: Boolean = false) {
 
   routing {
     get(stylesEndpoint) {
-      call.respondFile(File("resources/static/styles.css"))
+      call.respondFile(stylesFile)
     }
     static("/static") {
       resources("static")
