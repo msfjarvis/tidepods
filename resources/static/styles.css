@@ -1,4 +1,10 @@
 /* Imported from this CodePen project https://codepen.io/gmb/pen/xVGYZw */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html {
   font-size: 62.5%;
 }
@@ -7,22 +13,24 @@ body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.6rem;
   line-height: 1.6;
-  color: #20262e;
-  background-color: #28b1de;
+  color: #fff;
+  background-color: #20262e;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding: 10 10;
 }
 
 .container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 0 5%;
+  max-width: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 h1 {
+  padding-top: 20px;
   text-align: center;
   font-size: 3rem;
-  color: rgba(255, 255, 255, .8);
+  color: #fff;
   text-transform: uppercase;
   line-height: 1.375;
   margin: 0 0 2.4rem 0;
@@ -40,11 +48,13 @@ h2 {
 
 table {
   width: 100%;
-  min-width: 300px;
+  min-width: 500px;
   margin-bottom: 2.4rem;
   background-color: #20262e;
   color: #fff;
   overflow: hidden;
+  padding-right: 40px;
+  padding-left: 40px;
 }
 
 table tr:nth-child(even) {
@@ -53,7 +63,7 @@ table tr:nth-child(even) {
 
 table th,
 table td:before {
-  color: #28b1de;
+  color: #fff;
 }
 
 table th {
