@@ -161,7 +161,10 @@ fun Application.module(test: Boolean = false) {
     }
     post("/stats") {
       val body = json.parse(Site.serializer().list, call.receiveText())
-      body.forEach { site -> db[site.url] = site.views }
+      synchronized(db) {
+        db.clear()
+        body.forEach { site -> db[site.url] = site.views }
+      }
       flushToDisk()
       call.respondText { "Entered bulk data into stats DB" }
     }
