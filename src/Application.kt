@@ -141,18 +141,19 @@ fun Application.module(test: Boolean = false) {
                       }
                     }
                   } else {
-                    json.parse(Site.serializer().list, latestStats).sortedBy { it.views }.reversed().map { (url, count) ->
-                      tr {
-                        td {
-                          attributes["data-th"] = "URL"
-                          +url
-                        }
-                        td {
-                          attributes["data-th"] = "Count"
-                          +"$count"
+                    json.parse(Site.serializer().list, latestStats).sortedBy { it.views }.reversed()
+                      .map { (url, count) ->
+                        tr {
+                          td {
+                            attributes["data-th"] = "URL"
+                            +url
+                          }
+                          td {
+                            attributes["data-th"] = "Count"
+                            +"$count"
+                          }
                         }
                       }
-                    }
                   }
                 }
               }
