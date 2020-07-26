@@ -2,6 +2,8 @@ package dev.msfjarvis
 
 import io.ktor.application.Application
 import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.features.AutoHeadResponse
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -45,6 +47,8 @@ fun main(args: Array<String>) = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
 fun Application.module(test: Boolean = false) {
+
+  install(AutoHeadResponse)
 
   Timer().scheduleAtFixedRate(object : TimerTask() {
     override fun run() {
