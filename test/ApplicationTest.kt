@@ -74,7 +74,7 @@ class ApplicationTest {
       <html>
         <head>
           <title>Stats</title>
-          <link href="/static/styles.css" rel="stylesheet">
+          <link href="/styles.css" rel="stylesheet">
         </head>
         <body>
           <div class="container">
