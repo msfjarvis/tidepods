@@ -129,20 +129,23 @@ fun Application.module(test: Boolean = false) {
                     th { +"Count" }
                   }
                   if (test) {
-                    db.forEach { (url, count) ->
-                      tr {
-                        td {
-                          attributes["data-th"] = "URL"
-                          +url
-                        }
-                        td {
-                          attributes["data-th"] = "Count"
-                          +"$count"
+                    db.filter { (_, views) -> views > 10 }
+                      .forEach { (url, count) ->
+                        tr {
+                          td {
+                            attributes["data-th"] = "URL"
+                            +url
+                          }
+                          td {
+                            attributes["data-th"] = "Count"
+                            +"$count"
+                          }
                         }
                       }
-                    }
                   } else {
-                    json.parse(Site.serializer().list, latestStats).sortedBy { it.views }.reversed()
+                    json.parse(Site.serializer().list, latestStats)
+                      .filter { (_, views) -> views > 10 }
+                      .sortedBy { it.views }.reversed()
                       .map { (url, count) ->
                         tr {
                           td {

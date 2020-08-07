@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ApplicationTest {
-  private val testData = arrayListOf(Site("https://msfjarvis.dev", 1))
+  private val testData = arrayListOf(Site("https://msfjarvis.dev", 100))
   @Test
   fun testRoot() {
     withTestApplication({ module(true) }) {
@@ -29,10 +29,12 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals("No url query parameter provided", response.content)
       }
-      testData.map { (url, _) ->
-        handleRequest(HttpMethod.Get, "/view?url=$url").apply {
-          assertEquals(HttpStatusCode.OK, response.status())
-          assertEquals("View recoded for $url", response.content)
+      testData.map { (url, views) ->
+        for (i in 0 until views) {
+          handleRequest(HttpMethod.Get, "/view?url=$url").apply {
+            assertEquals(HttpStatusCode.OK, response.status())
+            assertEquals("View recoded for $url", response.content)
+          }
         }
       }
       handleRequest(HttpMethod.Get, "/stats").apply {
@@ -49,7 +51,7 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.OK, response.status())
         assertEquals(testData, json.parse(Site.serializer().list, response.content!!))
       }
-      testData.add(Site("https://msfjarvis.dev/g/tidepods", 2))
+      testData.add(Site("https://msfjarvis.dev/g/tidepods", 20))
       testData.sortBy { it.views }
       handleRequest(HttpMethod.Post, "/stats") {
         setBody(
@@ -87,7 +89,7 @@ class ApplicationTest {
                 </tr>
                 <tr>
                   <td data-th="URL">https://msfjarvis.dev</td>
-                  <td data-th="Count">1</td>
+                  <td data-th="Count">100</td>
                 </tr>
               </tbody>
             </table>
