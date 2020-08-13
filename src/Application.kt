@@ -31,9 +31,10 @@ import kotlin.system.exitProcess
 
 val db = HashMap<String, Long>()
 val json = Json(JsonConfiguration.Stable)
-var latestStats = ""
 val statsFile = File("stats.json")
 val stylesFile = File("resources/static/styles.css")
+val exclusionRegex = "(asp|carddav|css|ico|js|txt|webp|xml|\\.env)$".toRegex()
+var latestStats = ""
 
 @Serializable
 data class Site(val url: String, val views: Long)
@@ -69,7 +70,9 @@ fun Application.module(test: Boolean = false) {
     if (statsFile.exists()) {
       latestStats = statsFile.readText()
       if (latestStats.isEmpty()) latestStats = "[]"
-      json.parse(Site.serializer().list, latestStats).map { (url, views) -> db[url] = views }
+      json.parse(Site.serializer().list, latestStats)
+        .filter { (url, _) -> !url.matches(exclusionRegex) }
+        .map { (url, views) -> db[url] = views }
     } else {
       if (!statsFile.createNewFile()) {
         println("Failed to create statsFile $statsFile")
@@ -98,7 +101,7 @@ fun Application.module(test: Boolean = false) {
       val url = call.request.queryParameters["url"]
       if (url.isNullOrEmpty()) {
         call.respondText("No url query parameter provided")
-      } else {
+      } else if (!url.matches(exclusionRegex)) {
         launch(Dispatchers.IO) {
           synchronized(db) {
             var count = db[url] ?: 0
