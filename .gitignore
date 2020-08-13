@@ -143,3 +143,6 @@ gradle-app.setting
 **/build/
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,kotlin,intellij
+
+# Raw JSON for cheap persistence
+stats.json
