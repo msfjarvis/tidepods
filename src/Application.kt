@@ -33,7 +33,7 @@ val db = HashMap<String, Long>()
 val json = Json(JsonConfiguration.Stable)
 val statsFile = File("stats.json")
 val stylesFile = File("resources/static/styles.css")
-val exclusionRegex = "(asp|carddav|css|ico|js|txt|webp|xml|\\.env)$".toRegex()
+val exclusionRegex = "asp|carddav|css|ico|js|txt|webp|xml|\\.env$".toRegex()
 var latestStats = ""
 
 @Serializable
