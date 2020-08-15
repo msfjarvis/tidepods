@@ -71,7 +71,7 @@ fun Application.module(test: Boolean = false) {
       latestStats = statsFile.readText()
       if (latestStats.isEmpty()) latestStats = "[]"
       json.parse(Site.serializer().list, latestStats)
-        .filter { (url, _) -> !url.matches(exclusionRegex) }
+        .filter { (url, _) -> !exclusionRegex.containsMatchIn(url) }
         .map { (url, views) -> db[url] = views }
     } else {
       if (!statsFile.createNewFile()) {
@@ -101,7 +101,7 @@ fun Application.module(test: Boolean = false) {
       val url = call.request.queryParameters["url"]
       if (url.isNullOrEmpty()) {
         call.respondText("No url query parameter provided")
-      } else if (!url.matches(exclusionRegex)) {
+      } else if (!exclusionRegex.containsMatchIn(url)) {
         launch(Dispatchers.IO) {
           synchronized(db) {
             var count = db[url] ?: 0
